@@ -1,5 +1,7 @@
 # Windows Diagnostic Toolkit
 
+**Deutsch** | [English](README_EN.md)
+
 Ein menübasiertes Diagnose- und Wartungstool für Windows 10 und Windows 11.
 
 Das Toolkit bündelt häufig benötigte Windows-Diagnosefunktionen in einer einzigen Batch-Datei und ergänzt sie um einen automatischen **PC-Gesamtcheck mit Ampelsystem** sowie ausführliche TXT- und HTML-Diagnoseberichte.
