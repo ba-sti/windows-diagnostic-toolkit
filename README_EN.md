@@ -113,6 +113,64 @@ Reports are stored by default in:
 %USERPROFILE%\Desktop\Windows_Diagnostics
 ```
 
+## Menu Items and Commands Used
+
+The following table shows which Windows, CMD, or PowerShell command is used by each menu item. Composite functions such as the health check and diagnostic reports combine multiple queries; for those entries, the main commands used are listed.
+
+| No. | Menu item | Command / technique used |
+|---:|---|---|
+| 0 | PC health check with traffic-light status | Combination of `Get-CimInstance Win32_OperatingSystem`, `Get-PhysicalDisk`, `Get-CimInstance Win32_LogicalDisk`, `Get-Service`, `Get-CimInstance Win32_Service`, `Get-CimInstance Win32_PnPEntity`, `Get-WinEvent`, `Get-NetIPConfiguration`, `Resolve-DnsName`, `Test-NetConnection`, `Get-MpComputerStatus`, and `Get-CimInstance SoftwareLicensingProduct` |
+| 1 | Open Windows Update | `start "" ms-settings:windowsupdate` |
+| 2 | Check Windows Update services | `sc query wuauserv`, `sc query bits`, `sc query usosvc`, `sc query cryptsvc`, `sc query WaaSMedicSvc` |
+| 3 | Restart Windows Update services | `net stop wuauserv`, `net stop bits`, `net stop cryptsvc`, followed by `net start ...` |
+| 4 | Clear Windows Update download cache | Stop services, then `del /f /s /q "%windir%\SoftwareDistribution\Download\*"` and remove subdirectories |
+| 5 | SFC system file check | `sfc /scannow` |
+| 6 | Check DISM component store | `DISM /Online /Cleanup-Image /ScanHealth` |
+| 7 | Repair DISM component store | `DISM /Online /Cleanup-Image /RestoreHealth` |
+| 8 | Windows activation status | `cscript //nologo %windir%\system32\slmgr.vbs /xpr` and `/dli` |
+| 9 | Show Wi-Fi profiles | `netsh wlan show profiles` |
+| 10 | Show Wi-Fi driver information | `netsh wlan show drivers` |
+| 11 | Network interfaces / IP configuration | `ipconfig /all` and `Get-NetAdapter` |
+| 12 | Routing table | `route print` |
+| 13 | Test DNS resolution | `nslookup <hostname>` and `Resolve-DnsName <hostname>` |
+| 14 | Trace network route | `tracert <target>` |
+| 15 | Ping test | `ping -n <count> <target>` |
+| 16 | TCP port test | `Test-NetConnection -ComputerName <host> -Port <port> -InformationLevel Detailed` |
+| 17 | Show DNS cache | `ipconfig /displaydns` |
+| 18 | Clear DNS cache | `ipconfig /flushdns` |
+| 19 | Winsock / TCP-IP reset | `netsh winsock reset` and `netsh int ip reset` |
+| 20 | Check drive C: | `chkdsk C: /scan` |
+| 21 | Analyze disk usage | `Get-CimInstance Win32_LogicalDisk -Filter "DriveType=3"` |
+| 22 | SMART / disk health | `Get-PhysicalDisk` using `HealthStatus` and `OperationalStatus` |
+| 23 | Physical disks | `Get-CimInstance Win32_DiskDrive` |
+| 24 | RAM information | `Get-CimInstance Win32_ComputerSystem` and `Get-CimInstance Win32_PhysicalMemory` |
+| 25 | CPU information | `Get-CimInstance Win32_Processor` |
+| 26 | GPU information | `Get-CimInstance Win32_VideoController`; for NVIDIA, additionally `nvidia-smi` |
+| 27 | Temperatures | `Get-CimInstance -Namespace root/wmi -ClassName MSAcpi_ThermalZoneTemperature`; for NVIDIA, additionally `nvidia-smi --query-gpu=...` |
+| 28 | High-CPU processes | `Get-Process \| Sort-Object CPU -Descending \| Select-Object -First 20 ...` |
+| 29 | High-memory processes | `Get-Process \| Sort-Object WorkingSet64 -Descending \| Select-Object -First 20 ...` |
+| 30 | Startup entries | `Get-CimInstance Win32_StartupCommand` |
+| 31 | Services with error status | `Get-CimInstance Win32_Service \| Where-Object { $_.StartMode -eq 'Auto' -and $_.State -ne 'Running' }` |
+| 32 | Critical system events from the last 24h | `Get-WinEvent -FilterHashtable @{LogName='System';Level=1,2;StartTime=<24h>}` |
+| 33 | Critical application events from the last 24h | `Get-WinEvent -FilterHashtable @{LogName='Application';Level=1,2;StartTime=<24h>}` |
+| 34 | Windows Reliability Monitor | `perfmon /rel` |
+| 35 | Resource Monitor | `resmon.exe` |
+| 36 | Task Manager | `taskmgr.exe` |
+| 37 | Storage settings | `start "" ms-settings:storagesense` |
+| 38 | Disk Management | `diskmgmt.msc` |
+| 39 | Startup Apps | `start "" ms-settings:startupapps` |
+| 40 | Task Scheduler | `taskschd.msc` |
+| 41 | Event Viewer | `eventvwr.msc` |
+| 42 | Device Manager | `devmgmt.msc` |
+| 43 | Complete TXT diagnostic report | Combination of `Get-CimInstance`, `Get-PhysicalDisk`, `Get-NetAdapter`, `Get-NetIPConfiguration`, `Get-Process`, `Get-WinEvent`, plus `Format-Table` / `Format-List`; output via `Set-Content` / `Add-Content` |
+| 44 | Complete HTML diagnostic report | Uses the same system queries as the TXT report; tables are generated with `ConvertTo-Html -Fragment` and saved as HTML with `Set-Content` |
+| 45 | Open report folder | `explorer.exe "%USERPROFILE%\Desktop\Windows_Diagnostics"` |
+
+### Notes on the commands
+
+The table lists the core commands actually used by the script. Some menu items add formatting, error handling, confirmation prompts, or variables for user-supplied targets. The complete implementation can be reviewed directly in [`windows-diagnostic-toolkit-en.bat`](windows-diagnostic-toolkit-en.bat).
+
+
 ## Installation
 
 No installation is required.
