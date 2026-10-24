@@ -1,0 +1,8 @@
+# Generated reports
+Windows_Diagnostics/
+*.html
+*.txt
+
+# Windows
+Thumbs.db
+Desktop.ini
